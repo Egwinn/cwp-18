@@ -6,6 +6,33 @@ class FileLogger extends Logger {
         super(prefix, defaultLevel, dateFormat);
         this.file = file;
     }
+
+    log(message, level = this.defaultLevel) {
+        return new Promise((resolve, reject) => {
+            if (typeof(this.file) === 'string' || this.file instanceof String) {
+                fs.appendFile(this.file, this.format(message, level), (err) => {
+                    if (err) {
+                        console.error(err);
+                        reject(false);
+                    }
+                    else resolve(true);
+                });
+            }
+            else {
+                this.file.write(this.format(message, level), (err) => {
+                    if (err) {
+                        console.error(err);
+                        fs.close(this.file);
+                        reject(false);
+                    }
+                    else {
+                        fs.close(this.file);
+                        resolve(true);
+                    }
+                });
+            }
+        });
+    }
 }
 
 module.exports = FileLogger;
