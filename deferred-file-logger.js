@@ -4,7 +4,7 @@ const fs = require('fs');
 let queue = [];
 
 class DeferredFileLogger extends FileLogger {
-    constructor(file = "default.txt", queueLength = 3, prefix = "prefix", defaultLevel = "LOG", dateFormat = "dddd, MMMM Do YYYY, h:mm:ss a") {
+    constructor(file = "default.txt", queueLength = 2, prefix = "prefix", defaultLevel = "LOG", dateFormat = "dddd, MMMM Do YYYY, h:mm:ss a") {
         super(file, prefix, defaultLevel, dateFormat);
         this.queueLength = queueLength;
     }
@@ -14,7 +14,7 @@ class DeferredFileLogger extends FileLogger {
         return new Promise((resolve, reject) => {
             if (queue.length === this.queueLength) {
                 if (typeof(this.file) === 'string' || this.file instanceof String) {
-                    fs.appendFile(this.file, queue.join(''), (err) => {
+                    fs.appendFile(this.file, queue.join("\r\n") + "\r\n", (err) => {
                         if (err) {
                             console.error(err);
                             reject(false);
@@ -26,15 +26,15 @@ class DeferredFileLogger extends FileLogger {
                     });
                 }
                 else {
-                    this.file.write(queue.join(''), (err) => {
+                    this.file.write(queue.join("\r\n") + "\r\n", (err) => {
                         if (err) {
                             console.error(err);
-                            fs.close(this.file);
+                            this.file.close();
                             reject(false);
                         }
                         else {
                             queue = [];
-                            fs.close(this.file);
+                            this.file.close();
                             resolve(true);
                         }
                     });

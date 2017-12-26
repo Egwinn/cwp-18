@@ -10,7 +10,7 @@ class FileLogger extends Logger {
     log(message, level = this.defaultLevel) {
         return new Promise((resolve, reject) => {
             if (typeof(this.file) === 'string' || this.file instanceof String) {
-                fs.appendFile(this.file, this.format(message, level), (err) => {
+                fs.appendFile(this.file, this.format(message + "\r\n", level), (err) => {
                     if (err) {
                         console.error(err);
                         reject(false);
@@ -19,14 +19,14 @@ class FileLogger extends Logger {
                 });
             }
             else {
-                this.file.write(this.format(message, level), (err) => {
+                this.file.write(this.format(message + "\r\n", level), (err) => {
                     if (err) {
                         console.error(err);
-                        fs.close(this.file);
+                        this.file.close();
                         reject(false);
                     }
                     else {
-                        fs.close(this.file);
+                        this.file.close();
                         resolve(true);
                     }
                 });
